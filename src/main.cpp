@@ -7,12 +7,18 @@
 #include "imgui.h"
 #include "home/Constants.hpp"
 #include "home/Kernel.hpp"
+#include "home/Console.hpp"
 
 static bool showMenuBar = true;
 static bool showTeste = false;
+static bool showConsole = false;
+
+static Kernel kernel;
+static Console console;
 
 static void createMenuBar();
 static void createTeste();
+static void createConsole();
 
 static void createMenuBar()
 {
@@ -21,6 +27,8 @@ static void createMenuBar()
             if (ImGui::BeginMenu("Ferramentas")) {
                 if (ImGui::MenuItem("Teste"))
                     showTeste = true;
+                if (ImGui::MenuItem("Terminal"))
+                    showConsole = true;
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
@@ -31,7 +39,7 @@ static void createMenuBar()
 static void createTeste()
 {
     if (showTeste) {
-        if (ImGui::Begin("Início", &showTeste)) {
+        if (ImGui::Begin("Teste", &showTeste)) {
             ImGui::Text("Olá, Mundo!");
             if (ImGui::Button("Fechar")) {
                 spdlog::info("Fechando teste...");
@@ -42,11 +50,15 @@ static void createTeste()
     }
 }
 
+static void createConsole()
+{
+    if (showConsole)
+        console.draw("Terminal", &showConsole);
+}
+
 int main(int, char**)
 {
     spdlog::info("Home - v{}", Constants::VERSION);
-
-    Kernel kernel;
 
     auto error = kernel.init();
     if (error) {
@@ -59,6 +71,7 @@ int main(int, char**)
 
         createMenuBar();
         createTeste();
+        createConsole();
 
         kernel.render();
     }
