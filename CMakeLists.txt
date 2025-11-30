@@ -11,6 +11,7 @@ add_compile_definitions(VERSION_NUMBER="${PROJECT_VERSION}")
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(spdlog REQUIRED)
 
 set(IMGUI_DIR "external/imgui")
 
@@ -44,4 +45,5 @@ target_link_libraries(home PRIVATE
     imgui_static 
     glfw 
     OpenGL::GL
+    spdlog::spdlog
 )

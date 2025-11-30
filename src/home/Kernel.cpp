@@ -1,5 +1,6 @@
 #include <GLFW/glfw3.h>
 #include <optional>
+#include <spdlog/spdlog.h>
 #include <string>
 
 #include "Kernel.hpp"
@@ -13,6 +14,8 @@ Kernel::~Kernel() = default;
 
 std::optional<std::string> Kernel::init()
 {
+    spdlog::info("Iniciando...");
+
     if (!glfwInit())
         return "Falha ao inicializar o GLFW";
 
@@ -20,7 +23,7 @@ std::optional<std::string> Kernel::init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(1280, 720, "Home", nullptr, nullptr);
+    window = glfwCreateWindow(1000, 600, "Home", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return "Falha ao criar a janela GLFW";
@@ -45,6 +48,8 @@ std::optional<std::string> Kernel::init()
 
 void Kernel::shutdown()
 {
+    spdlog::info("Finalizando...");
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -62,7 +67,7 @@ int Kernel::loop()
 
 void Kernel::newFrame()
 {
-    glfwPollEvents();
+    glfwWaitEventsTimeout(0.034);
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -76,7 +81,7 @@ void Kernel::render()
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
 
-    glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
+    glClearColor(0.067f, 0.067f, 0.067f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

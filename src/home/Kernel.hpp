@@ -19,5 +19,5 @@ public:
     void render();
     void close();
 
-    GLFWwindow* window{nullptr};
+    GLFWwindow* window = nullptr;
 };
