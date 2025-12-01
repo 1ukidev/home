@@ -2,7 +2,11 @@
 // See the LICENCE file in the repository root for full licence text.
 
 #include <cstdlib>
-#include <spdlog/spdlog.h>
+#include <string>
+#include <print>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 #include "imgui.h"
 #include "home/Constants.hpp"
@@ -42,7 +46,7 @@ static void createTeste()
         if (ImGui::Begin("Teste", &showTeste)) {
             ImGui::Text("Olá, Mundo!");
             if (ImGui::Button("Fechar")) {
-                spdlog::info("Fechando teste...");
+                std::println("Fechando teste...");
                 showTeste = false;
             }
         }
@@ -56,25 +60,34 @@ static void createConsole()
         console.draw("Terminal", &showConsole);
 }
 
+static void loop(void* arg)
+{
+    kernel.newFrame();
+
+    createMenuBar();
+    createTeste();
+    createConsole();
+
+    kernel.render();
+}
+
 int main(int, char**)
 {
-    spdlog::info("Home - v{}", Constants::VERSION);
+    std::println("Home - v{}", Constants::VERSION);
 
-    auto error = kernel.init();
-    if (error) {
-        spdlog::error("Erro ao inicializar o kernel: {}", *error);
+    std::string error = kernel.init();
+    if (!error.empty()) {
+        std::println(stderr, "Erro ao inicializar o kernel: {}", error);
         return EXIT_FAILURE;
     }
 
-    while (kernel.loop()) {
-        kernel.newFrame();
-
-        createMenuBar();
-        createTeste();
-        createConsole();
-
-        kernel.render();
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop_arg(loop, NULL, 0, true);
+#else
+    while (kernel.isOpen()) {
+        loop(NULL);
     }
+#endif
 
     kernel.shutdown();
 

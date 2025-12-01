@@ -1,4 +1,5 @@
 build/
-vscode-build/
+build_web/
+vscode_build/
 
 imgui.ini

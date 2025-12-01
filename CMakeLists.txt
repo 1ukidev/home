@@ -9,9 +9,10 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 add_compile_definitions(VERSION_NUMBER="${PROJECT_VERSION}")
 
-find_package(OpenGL REQUIRED)
-find_package(glfw3 REQUIRED)
-find_package(spdlog REQUIRED)
+if(NOT EMSCRIPTEN)
+    find_package(OpenGL REQUIRED)
+    find_package(glfw3 REQUIRED)
+endif()
 
 set(IMGUI_DIR "external/imgui")
 
@@ -41,9 +42,25 @@ target_include_directories(home PRIVATE
     ${SRC_DIR}
 )
 
-target_link_libraries(home PRIVATE 
-    imgui_static 
-    glfw 
-    OpenGL::GL
-    spdlog::spdlog
-)
+if(EMSCRIPTEN)
+    target_link_options(home PRIVATE
+        "-sUSE_GLFW=3"
+        "-sUSE_WEBGL2=1"
+        "-sFULL_ES3=1"
+        "-sWASM=1"
+        "-sALLOW_MEMORY_GROWTH=1"
+        "-sNO_DISABLE_EXCEPTION_CATCHING"
+    )
+
+    set_target_properties(home PROPERTIES SUFFIX ".html")
+
+    target_link_libraries(home PRIVATE
+        imgui_static
+    )
+else()
+    target_link_libraries(home PRIVATE
+        imgui_static
+        glfw
+        OpenGL::GL
+    )
+endif()

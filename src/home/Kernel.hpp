@@ -1,6 +1,5 @@
 #pragma once
 
-#include <optional>
 #include <string>
 
 #include "imgui_impl_glfw.h"
@@ -11,10 +10,10 @@ public:
     Kernel();
     ~Kernel();
 
-    std::optional<std::string> init();
+    std::string init();
     void shutdown();
 
-    int loop();
+    int isOpen();
     void newFrame();
     void render();
     void close();

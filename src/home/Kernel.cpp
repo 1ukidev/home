@@ -1,7 +1,6 @@
 #include <GLFW/glfw3.h>
-#include <optional>
-#include <spdlog/spdlog.h>
 #include <string>
+#include <print>
 
 #include "Kernel.hpp"
 #include "Fonts.hpp"
@@ -12,9 +11,9 @@
 Kernel::Kernel() = default;
 Kernel::~Kernel() = default;
 
-std::optional<std::string> Kernel::init()
+std::string Kernel::init()
 {
-    spdlog::info("Iniciando...");
+    std::println("Iniciando...");
 
     if (!glfwInit())
         return "Falha ao inicializar o GLFW";
@@ -41,14 +40,19 @@ std::optional<std::string> Kernel::init()
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 130");
+    const char* glsl_version = "#version 130";
+#ifdef __EMSCRIPTEN__
+    glsl_version = "#version 300 es";
+#endif
+
+    ImGui_ImplOpenGL3_Init(glsl_version);
     
-    return std::nullopt;
+    return "";
 }
 
 void Kernel::shutdown()
 {
-    spdlog::info("Finalizando...");
+    std::println("Finalizando...");
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -60,7 +64,7 @@ void Kernel::shutdown()
     glfwTerminate();
 }
 
-int Kernel::loop()
+int Kernel::isOpen()
 {
     return !glfwWindowShouldClose(window);
 }

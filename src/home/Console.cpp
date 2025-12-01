@@ -14,7 +14,6 @@ Console::Console()
     commands.push_back("help");
     commands.push_back("clear");
     commands.push_back("echo");
-    addLog("Bem-vindo ao Terminal! Digite 'help'.");
 }
 
 Console::~Console()
@@ -42,22 +41,26 @@ void Console::execCommand(const char* command)
 {
     addLog("# %s", command);
     if (!command || !*command) return;
-    std::string cmd(command);
-    std::string cmd_up = cmd;
-    std::transform(cmd_up.begin(), cmd_up.end(), cmd_up.begin(), ::toupper);
+    std::string cmdUpper{command};
+    std::transform(cmdUpper.begin(), cmdUpper.end(), cmdUpper.begin(), ::toupper);
 
-    if (cmd_up == "CLEAR") {
+    if (cmdUpper == "CLEAR") {
         clearLog();
-    } else if (cmd_up == "HELP") {
-        addLog("Comandos disponíveis:");
-        for (const auto& c : commands) addLog("- %s", c.c_str());
-    } else if (cmd_up.rfind("ECHO ", 0) == 0) {
+    } else if (cmdUpper == "HELP") {
+        help();
+    } else if (cmdUpper.rfind("ECHO ", 0) == 0) {
         addLog("%s", command + 5);
     } else {
         addLog("Comando desconhecido: '%s'", command);
     }
 
     historyPos = -1;
+}
+
+void Console::help()
+{
+    addLog("Comandos disponíveis:");
+    for (const auto& c : commands) addLog("- %s", c.c_str());
 }
 
 int Console::textEditCallback(ImGuiInputTextCallbackData* data)
@@ -110,10 +113,10 @@ int Console::textEditCallback(ImGuiInputTextCallbackData* data)
     return 0;
 }
 
-void Console::draw(const char* title, bool* p_open)
+void Console::draw(const char* title, bool* pOpen)
 {
     ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin(title, p_open)) {
+    if (!ImGui::Begin(title, pOpen)) {
         ImGui::End();
         return;
     }
@@ -122,7 +125,7 @@ void Console::draw(const char* title, bool* p_open)
     ImGui::SameLine();
     if (ImGui::Button("Copiar")) {
         std::string all;
-        for (const auto& s : items) all += s; all += "\n";
+        for (const auto& s : items) { all += s; all += '\n'; }
         ImGui::SetClipboardText(all.c_str());
     }
     ImGui::SameLine();
@@ -148,7 +151,7 @@ void Console::draw(const char* title, bool* p_open)
     ImGui::EndChild();
     ImGui::Separator();
 
-    bool reclaim_focus = false;
+    bool reclaimFocus = false;
     ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue
                                 | ImGuiInputTextFlags_CallbackHistory
                                 | ImGuiInputTextFlags_CallbackCompletion;
@@ -157,11 +160,11 @@ void Console::draw(const char* title, bool* p_open)
         char* s = inputBuf;
         if (s[0]) execCommand(s);
         strcpy(s, "");
-        reclaim_focus = true;
+        reclaimFocus = true;
     }
 
     ImGui::SetItemDefaultFocus();
-    if (reclaim_focus) ImGui::SetKeyboardFocusHere(-1);
+    if (reclaimFocus) ImGui::SetKeyboardFocusHere(-1);
 
     ImGui::End();
 }

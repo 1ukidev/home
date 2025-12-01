@@ -11,10 +11,12 @@ public:
 
     void addLog(const char* fmt, ...) IM_FMTARGS(2);
     void clearLog();
+    void execCommand(const char* command);
 
-    void execCommand(const char* command_line);
+    void help();
+
     static int textEditCallback(ImGuiInputTextCallbackData* data);
-    void draw(const char* title, bool* p_open = nullptr);
+    void draw(const char* title, bool* pOpen = nullptr);
 
     char inputBuf[256];
     std::vector<std::string> items;
