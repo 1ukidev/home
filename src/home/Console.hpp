@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <string>
 
@@ -16,7 +18,7 @@ public:
     void help();
 
     static int textEditCallback(ImGuiInputTextCallbackData* data);
-    void draw(const char* title, bool* pOpen = nullptr);
+    void draw(const char* title, bool* open = nullptr);
 
     char inputBuf[256];
     std::vector<std::string> items;

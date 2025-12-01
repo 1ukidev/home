@@ -1,9 +1,8 @@
 // Copyright (c) Leonardo Moreira <leo.monteiro06@live.com>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#include <cstdlib>
-#include <string>
-#include <print>
+#include <stdlib.h>
+#include <stdio.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
@@ -35,6 +34,12 @@ static void createMenuBar()
                     showConsole = true;
                 ImGui::EndMenu();
             }
+#ifndef __EMSCRIPTEN__
+            if (ImGui::BeginMenu("Encerrar")) {
+                kernel.close();
+                ImGui::EndMenu();
+            }
+#endif
             ImGui::EndMainMenuBar();
         }
     }
@@ -46,7 +51,7 @@ static void createTeste()
         if (ImGui::Begin("Teste", &showTeste)) {
             ImGui::Text("Olá, Mundo!");
             if (ImGui::Button("Fechar")) {
-                std::println("Fechando teste...");
+                puts("Fechando teste...");
                 showTeste = false;
             }
         }
@@ -60,7 +65,7 @@ static void createConsole()
         console.draw("Terminal", &showConsole);
 }
 
-static void loop(void* arg)
+static void loop(void*)
 {
     kernel.newFrame();
 
@@ -73,20 +78,19 @@ static void loop(void* arg)
 
 int main(int, char**)
 {
-    std::println("Home - v{}", Constants::VERSION);
+    printf("Home - v%s\n", Constants::VERSION);
 
-    std::string error = kernel.init();
-    if (!error.empty()) {
-        std::println(stderr, "Erro ao inicializar o kernel: {}", error);
+    const char* error = kernel.init();
+    if (*error) {
+        fprintf(stderr, "Erro ao inicializar o kernel: %s\n", error);
         return EXIT_FAILURE;
     }
 
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop_arg(loop, NULL, 0, true);
+    emscripten_set_main_loop_arg(loop, nullptr, 0, true);
 #else
-    while (kernel.isOpen()) {
-        loop(NULL);
-    }
+    while (kernel.isOpen())
+        loop(nullptr);
 #endif
 
     kernel.shutdown();

@@ -1,8 +1,8 @@
+#include <stdarg.h>
+#include <stdio.h>
+#include <algorithm>
 #include <vector>
 #include <string>
-#include <algorithm>
-#include <cstdarg>
-#include <stdio.h>
 
 #include "Console.hpp"
 
@@ -14,6 +14,7 @@ Console::Console()
     commands.push_back("help");
     commands.push_back("clear");
     commands.push_back("echo");
+    commands.push_back("fps");
 }
 
 Console::~Console()
@@ -27,7 +28,7 @@ void Console::addLog(const char* fmt, ...)
     va_start(args, fmt);
     char buf[1024];
     vsnprintf(buf, sizeof(buf), fmt, args);
-    buf[sizeof(buf)-1] = 0;
+    buf[sizeof(buf) - 1] = 0;
     va_end(args);
     items.push_back(std::string(buf));
 }
@@ -41,18 +42,19 @@ void Console::execCommand(const char* command)
 {
     addLog("# %s", command);
     if (!command || !*command) return;
-    std::string cmdUpper{command};
+    std::string cmdUpper = command;
     std::transform(cmdUpper.begin(), cmdUpper.end(), cmdUpper.begin(), ::toupper);
 
-    if (cmdUpper == "CLEAR") {
+    if (cmdUpper == "CLEAR")
         clearLog();
-    } else if (cmdUpper == "HELP") {
+    else if (cmdUpper == "HELP")
         help();
-    } else if (cmdUpper.rfind("ECHO ", 0) == 0) {
+    else if (cmdUpper.rfind("ECHO ", 0) == 0)
         addLog("%s", command + 5);
-    } else {
+    else if (cmdUpper == "FPS")
+        addLog("%.f", ImGui::GetIO().Framerate);
+    else
         addLog("Comando desconhecido: '%s'", command);
-    }
 
     historyPos = -1;
 }
@@ -69,12 +71,12 @@ int Console::textEditCallback(ImGuiInputTextCallbackData* data)
     switch (data->EventFlag) {
         case ImGuiInputTextFlags_CallbackCompletion: {
             const char* buf = data->Buf;
-            int buf_len = (int)strlen(buf);
+            int bufLen = (int)strlen(buf);
             std::vector<const char*> candidates;
             for (size_t i = 0; i < console->commands.size(); i++) {
                 const char* c = console->commands[i].c_str();
                 bool match = true;
-                for (int j = 0; j < buf_len; ++j) {
+                for (int j = 0; j < bufLen; ++j) {
                     if (toupper(buf[j]) != toupper(c[j])) { match = false; break; }
                 }
                 if (match) candidates.push_back(c);
@@ -92,7 +94,7 @@ int Console::textEditCallback(ImGuiInputTextCallbackData* data)
             break;
         }
         case ImGuiInputTextFlags_CallbackHistory: {
-            const int prev_history_pos = console->historyPos;
+            const int prevHistoryPos = console->historyPos;
             if (data->EventKey == ImGuiKey_UpArrow) {
                 if (console->historyPos == -1)
                     console->historyPos = (int)console->items.size() - 1;
@@ -103,7 +105,7 @@ int Console::textEditCallback(ImGuiInputTextCallbackData* data)
                     if (++console->historyPos >= (int)console->items.size())
                         console->historyPos = -1;
             }
-            if (prev_history_pos != console->historyPos) {
+            if (prevHistoryPos != console->historyPos) {
                 data->DeleteChars(0, data->BufTextLen);
                 if (console->historyPos != -1)
                     data->InsertChars(0, console->items[console->historyPos].c_str());
@@ -113,10 +115,10 @@ int Console::textEditCallback(ImGuiInputTextCallbackData* data)
     return 0;
 }
 
-void Console::draw(const char* title, bool* pOpen)
+void Console::draw(const char* title, bool* open)
 {
     ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin(title, pOpen)) {
+    if (!ImGui::Begin(title, open)) {
         ImGui::End();
         return;
     }

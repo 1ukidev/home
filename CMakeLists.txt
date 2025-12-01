@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(home LANGUAGES CXX VERSION 0.0.1)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -38,10 +38,6 @@ add_executable(home
     ${PROJECT_SOURCES}
 )
 
-target_include_directories(home PRIVATE
-    ${SRC_DIR}
-)
-
 if(EMSCRIPTEN)
     target_link_options(home PRIVATE
         "-sUSE_GLFW=3"
@@ -49,7 +45,6 @@ if(EMSCRIPTEN)
         "-sFULL_ES3=1"
         "-sWASM=1"
         "-sALLOW_MEMORY_GROWTH=1"
-        "-sNO_DISABLE_EXCEPTION_CATCHING"
     )
 
     set_target_properties(home PROPERTIES SUFFIX ".html")

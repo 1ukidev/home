@@ -5,7 +5,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "Launch",
-            "program": "${workspaceFolder}/vscode-build/home",
+            "program": "${workspaceFolder}/vscode_build/home",
             "args": [],
             "cwd": "${workspaceFolder}"
         }

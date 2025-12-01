@@ -1,31 +1,45 @@
+#include <stdio.h>
 #include <GLFW/glfw3.h>
-#include <string>
-#include <print>
 
-#include "Kernel.hpp"
-#include "Fonts.hpp"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "Constants.hpp"
+#include "Kernel.hpp"
+#include "Fonts.hpp"
 
 Kernel::Kernel() = default;
-Kernel::~Kernel() = default;
 
-std::string Kernel::init()
+Kernel::~Kernel()
 {
-    std::println("Iniciando...");
+    shutdown();
+}
+
+const char* Kernel::init()
+{
+    if (running)
+        return "já está em execução";
+
+    puts("Iniciando...");
 
     if (!glfwInit())
-        return "Falha ao inicializar o GLFW";
+        return "falha ao inicializar o GLFW";
 
+#ifdef __EMSCRIPTEN__
+    const char* glsl_version = "#version 300 es";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#else
+    const char* glsl_version = "#version 130";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+#endif
 
-    window = glfwCreateWindow(1000, 600, "Home", nullptr, nullptr);
+    window = glfwCreateWindow(Constants::W_WIDTH, Constants::W_HEIGHT, Constants::TITLE, nullptr, nullptr);
     if (!window) {
         glfwTerminate();
-        return "Falha ao criar a janela GLFW";
+        return "falha ao criar a janela GLFW";
     }
 
     glfwMakeContextCurrent(window);
@@ -35,42 +49,64 @@ std::string Kernel::init()
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.Fonts->AddFontFromMemoryCompressedTTF(roboto_compressed_data, roboto_compressed_size, 16.0f);
+    io.Fonts->AddFontFromMemoryCompressedTTF(roboto_compressed_data, roboto_compressed_size, Constants::FONT_SIZE);
 
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    const char* glsl_version = "#version 130";
 #ifdef __EMSCRIPTEN__
-    glsl_version = "#version 300 es";
+    ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
 #endif
-
     ImGui_ImplOpenGL3_Init(glsl_version);
+
+    running = true;
     
     return "";
 }
 
 void Kernel::shutdown()
 {
-    std::println("Finalizando...");
+    if (!running) return;
+
+    puts("Finalizando...");
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    if (window)
-        glfwDestroyWindow(window);
-
+    glfwDestroyWindow(window);
     glfwTerminate();
+
+    running = false;
 }
 
-int Kernel::isOpen()
+#ifndef __EMSCRIPTEN__
+void Kernel::close()
 {
-    return !glfwWindowShouldClose(window);
+    if (!running) return;
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
+}
+
+bool Kernel::isOpen() const
+{
+    return running && !glfwWindowShouldClose(window);
+}
+#endif
+
+bool Kernel::isRunning() const
+{
+    return running;
+}
+
+GLFWwindow* Kernel::getWindow() const
+{
+    return window;
 }
 
 void Kernel::newFrame()
 {
+    if (!running) return;
+
     glfwWaitEventsTimeout(0.034);
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -80,21 +116,17 @@ void Kernel::newFrame()
 
 void Kernel::render()
 {
+    if (!running) return;
+
     ImGui::Render();
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
 
-    glClearColor(0.067f, 0.067f, 0.067f, 1.0f);
+    glClearColor(Constants::BG_R, Constants::BG_G, Constants::BG_B, Constants::BG_A);
     glClear(GL_COLOR_BUFFER_BIT);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
-}
-
-void Kernel::close()
-{
-    if (window)
-        glfwSetWindowShouldClose(window, true);
 }

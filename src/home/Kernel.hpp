@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include "imgui_impl_glfw.h"
 
 class Kernel
@@ -10,13 +8,19 @@ public:
     Kernel();
     ~Kernel();
 
-    std::string init();
+    const char* init();
     void shutdown();
+#ifndef __EMSCRIPTEN__
+    void close();
+    bool isOpen() const;
+#endif
+    bool isRunning() const;
+    GLFWwindow* getWindow() const;
 
-    int isOpen();
     void newFrame();
     void render();
-    void close();
 
+private:
+    bool running = false;
     GLFWwindow* window = nullptr;
 };
