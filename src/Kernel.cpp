@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <string_view>
 #include <GLFW/glfw3.h>
 
 #include "imgui.h"
@@ -12,15 +12,15 @@ Kernel::Kernel() = default;
 
 Kernel::~Kernel()
 {
+#ifndef __EMSCRIPTEN__
     shutdown();
+#endif
 }
 
-const char* Kernel::init()
+std::string_view Kernel::init()
 {
     if (running)
         return "já está em execução";
-
-    puts("Iniciando...");
 
     if (!glfwInit())
         return "falha ao inicializar o GLFW";
@@ -36,7 +36,7 @@ const char* Kernel::init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
 
-    window = glfwCreateWindow(Constants::W_WIDTH, Constants::W_HEIGHT, Constants::TITLE, nullptr, nullptr);
+    window = glfwCreateWindow(Constants::W_WIDTH, Constants::W_HEIGHT, Constants::TITLE.data(), nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return "falha ao criar a janela GLFW";
@@ -64,11 +64,10 @@ const char* Kernel::init()
     return "";
 }
 
+#ifndef __EMSCRIPTEN__
 void Kernel::shutdown()
 {
     if (!running) return;
-
-    puts("Finalizando...");
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -80,7 +79,6 @@ void Kernel::shutdown()
     running = false;
 }
 
-#ifndef __EMSCRIPTEN__
 void Kernel::close()
 {
     if (!running) return;
@@ -107,7 +105,9 @@ void Kernel::newFrame()
 {
     if (!running) return;
 
+#ifndef __EMSCRIPTEN__
     glfwWaitEventsTimeout(0.034);
+#endif
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();

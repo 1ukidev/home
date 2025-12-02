@@ -1,10 +1,12 @@
 #pragma once
 
+#include <string_view>
+
 class Constants
 {
 public:
-    static constexpr const char* TITLE = "Home";
-    static constexpr const char* VERSION = VERSION_NUMBER;
+    static constexpr std::string_view TITLE = "Home";
+    static constexpr std::string_view VERSION = VERSION_NUMBER;
 
     static constexpr int W_WIDTH = 1000;
     static constexpr int W_HEIGHT = 600;

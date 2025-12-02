@@ -1,6 +1,7 @@
-#include <stdarg.h>
-#include <stdio.h>
 #include <algorithm>
+#include <cstdarg>
+#include <cstdio>
+#include <cstring>
 #include <vector>
 #include <string>
 
@@ -8,7 +9,7 @@
 
 Console::Console()
 {
-    memset(inputBuf, 0, sizeof(inputBuf));
+    std::memset(inputBuf, 0, sizeof(inputBuf));
     historyPos = -1;
     autoScroll = true;
     commands.push_back("help");
@@ -24,10 +25,10 @@ Console::~Console()
 
 void Console::addLog(const char* fmt, ...)
 {
-    va_list args;
+    std::va_list args;
     va_start(args, fmt);
     char buf[1024];
-    vsnprintf(buf, sizeof(buf), fmt, args);
+    std::vsnprintf(buf, sizeof(buf), fmt, args);
     buf[sizeof(buf) - 1] = 0;
     va_end(args);
     items.push_back(std::string(buf));
@@ -63,6 +64,7 @@ void Console::help()
 {
     addLog("Comandos disponíveis:");
     for (const auto& c : commands) addLog("- %s", c.c_str());
+    addLog("");
 }
 
 int Console::textEditCallback(ImGuiInputTextCallbackData* data)
@@ -76,9 +78,8 @@ int Console::textEditCallback(ImGuiInputTextCallbackData* data)
             for (size_t i = 0; i < console->commands.size(); i++) {
                 const char* c = console->commands[i].c_str();
                 bool match = true;
-                for (int j = 0; j < bufLen; ++j) {
+                for (int j = 0; j < bufLen; ++j)
                     if (toupper(buf[j]) != toupper(c[j])) { match = false; break; }
-                }
                 if (match) candidates.push_back(c);
             }
             if (candidates.empty()) {
@@ -161,7 +162,7 @@ void Console::draw(const char* title, bool* open)
     if (ImGui::InputText("Entrada", inputBuf, IM_ARRAYSIZE(inputBuf), flags, &Console::textEditCallback, (void*)this)) {
         char* s = inputBuf;
         if (s[0]) execCommand(s);
-        strcpy(s, "");
+        std::strcpy(s, "");
         reclaimFocus = true;
     }
 

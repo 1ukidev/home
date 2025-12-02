@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.20)
 project(home LANGUAGES CXX VERSION 0.0.1)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 
 add_compile_definitions(VERSION_NUMBER="${PROJECT_VERSION}")
 
@@ -14,7 +14,7 @@ if(NOT EMSCRIPTEN)
     find_package(glfw3 REQUIRED)
 endif()
 
-set(IMGUI_DIR "external/imgui")
+set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/external/imgui")
 
 add_library(imgui_static STATIC
     ${IMGUI_DIR}/imgui.cpp
@@ -38,6 +38,9 @@ add_executable(home
     ${PROJECT_SOURCES}
 )
 
+set(SPDLOG_DIR "${CMAKE_SOURCE_DIR}/external/spdlog")
+add_subdirectory(${SPDLOG_DIR})
+
 if(EMSCRIPTEN)
     target_link_options(home PRIVATE
         "-sUSE_GLFW=3"
@@ -47,15 +50,20 @@ if(EMSCRIPTEN)
         "-sALLOW_MEMORY_GROWTH=1"
     )
 
-    set_target_properties(home PROPERTIES SUFFIX ".html")
+    set_target_properties(home PROPERTIES
+        OUTPUT_NAME "index"
+        SUFFIX ".html"
+    )
 
     target_link_libraries(home PRIVATE
         imgui_static
+        spdlog::spdlog
     )
 else()
     target_link_libraries(home PRIVATE
         imgui_static
-        glfw
+        spdlog::spdlog
         OpenGL::GL
+        glfw
     )
 endif()
