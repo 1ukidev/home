@@ -48,6 +48,7 @@ if(EMSCRIPTEN)
         "-sFULL_ES3=1"
         "-sWASM=1"
         "-sALLOW_MEMORY_GROWTH=1"
+        "--shell-file" "${CMAKE_SOURCE_DIR}/shell.html"
     )
 
     set_target_properties(home PROPERTIES
