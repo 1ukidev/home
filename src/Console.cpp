@@ -73,7 +73,7 @@ int Console::textEditCallback(ImGuiInputTextCallbackData* data)
     switch (data->EventFlag) {
         case ImGuiInputTextFlags_CallbackCompletion: {
             const char* buf = data->Buf;
-            int bufLen = (int)strlen(buf);
+            int bufLen = (int)std::strlen(buf);
             std::vector<const char*> candidates;
             for (size_t i = 0; i < console->commands.size(); i++) {
                 const char* c = console->commands[i].c_str();
@@ -87,7 +87,7 @@ int Console::textEditCallback(ImGuiInputTextCallbackData* data)
             } else if (candidates.size() == 1) {
                 data->DeleteChars(0, data->BufTextLen);
                 data->InsertChars(0, candidates[0]);
-                data->InsertChars((int)strlen(candidates[0]), " ");
+                data->InsertChars((int)std::strlen(candidates[0]), " ");
             } else {
                 console->addLog("Possíveis correspondências:");
                 for (const auto& c : candidates) console->addLog("- %s", c);

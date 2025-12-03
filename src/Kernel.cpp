@@ -1,5 +1,8 @@
 #include <string_view>
 #include <GLFW/glfw3.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
+#endif
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -36,7 +39,15 @@ std::string_view Kernel::init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
 
-    window = glfwCreateWindow(Constants::W_WIDTH, Constants::W_HEIGHT, Constants::TITLE.data(), nullptr, nullptr);
+#ifdef __EMSCRIPTEN__
+    double width, height;
+    emscripten_get_element_css_size("#canvas", &width, &height);
+#else
+    constexpr double width = Constants::W_WIDTH;
+    constexpr double height = Constants::W_HEIGHT;
+#endif
+
+    window = glfwCreateWindow((int)width, (int)height, Constants::TITLE.data(), nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return "falha ao criar a janela GLFW";

@@ -14,47 +14,47 @@
 #include "Console.hpp"
 
 static bool showMenuBar = true;
-static bool showTeste = false;
+static bool showSobreMim = false;
 static bool showConsole = false;
 
 static Kernel kernel;
 static Console console;
 
 static void createMenuBar();
-static void createTeste();
+static void createSobreMim();
 static void createConsole();
 
 static void createMenuBar()
 {
     if (showMenuBar) {
         if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::MenuItem("Sobre mim"))
+                showSobreMim = true;
+
             if (ImGui::BeginMenu("Ferramentas")) {
-                if (ImGui::MenuItem("Teste"))
-                    showTeste = true;
                 if (ImGui::MenuItem("Terminal"))
                     showConsole = true;
                 ImGui::EndMenu();
             }
+
 #ifndef __EMSCRIPTEN__
-            if (ImGui::BeginMenu("Encerrar")) {
+            if (ImGui::MenuItem("Encerrar"))
                 kernel.close();
-                ImGui::EndMenu();
-            }
 #endif
+
             ImGui::EndMainMenuBar();
         }
     }
 }
 
-static void createTeste()
+static void createSobreMim()
 {
-    if (showTeste) {
-        if (ImGui::Begin("Teste", &showTeste)) {
-            ImGui::Text("Olá, Mundo!");
-            if (ImGui::Button("Fechar")) {
-                spdlog::info("Fechando teste...");
-                showTeste = false;
-            }
+    if (showSobreMim) {
+        if (ImGui::Begin("Sobre mim", &showSobreMim)) {
+            ImGui::Text("Chave PGP: F0258C27407E9095");
+            ImGui::Text("GitHub: 1ukidev");
+            ImGui::Text("LinkedIn: leonardomm");
+            ImGui::Text("E-mail: leo.monteiro06@protonmail.com");
         }
         ImGui::End();
     }
@@ -71,7 +71,7 @@ static void loop(void*)
     kernel.newFrame();
 
     createMenuBar();
-    createTeste();
+    createSobreMim();
     createConsole();
 
     kernel.render();
